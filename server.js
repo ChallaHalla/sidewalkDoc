@@ -5,23 +5,33 @@ import session from 'express-session';
 import bodyParser from 'body-parser';
 const app = express();
 require( './db' );
+require( './auth' );
+
 app.set('view engine', 'hbs')
-const User = mongoose.model("User");
 const sessionOptions = {
 	secret: 'secret cookie thang (store this elsewhere!)',
 	resave: true,
 	saveUninitialized: true
 };
 
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function(user, done) {
+  done(null, user);
+});
+
 app.use(session(sessionOptions));
 app.use(passport.initialize());
 app.use(passport.session());
-require( './auth' );
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(function(req, res, next){
 	res.locals.user = req.user;
 	next();
 });
+
+const User = mongoose.model("User");
 
 var LocalStrategy = require('passport-local').Strategy;
 passport.use(new LocalStrategy(function(username, password, done) {
@@ -33,9 +43,14 @@ passport.use(new LocalStrategy(function(username, password, done) {
         // When user is not found
         if (!user) return done(null, false);
         // When password is not correct
-        if (!user.authenticate(password)) return done(null, false);
-        // When all things are good, we return the user
-        return done(null, user);
+				user.authenticate(password).then((e)=>{
+					console.log(e.error);
+					if(e.error !== undefined){
+						return done(null, false);
+					} else{
+						return done(null, user);
+					}
+				});
      });
 }));
 
@@ -43,6 +58,7 @@ passport.use(new LocalStrategy(function(username, password, done) {
 
 
 app.get("/",(req,res)=>{
+	console.log(req.user)
   res.render("index");
 });
 app.get("/register",(req,res)=>{
@@ -55,10 +71,13 @@ app.get("/login",(req,res)=>{
 app.post('/login', function(req,res,next) {
   passport.authenticate('local', function(err,user) {
     if(user) {
+			console.log(user);
       req.logIn(user, function(err) {
+				console.log(user);
         res.redirect('/');
       });
     } else {
+			console.log("incorrect credentials");
       res.render('/', {message:'Your login or password is incorrect.'});
     }
   })(req, res, next);
