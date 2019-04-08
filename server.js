@@ -4,6 +4,7 @@ import passport from 'passport';
 import session from 'express-session';
 import bodyParser from 'body-parser';
 const app = express();
+const ObjectId = require('mongoose').Types.ObjectId;
 require( './db' );
 require( './auth' );
 
@@ -28,10 +29,12 @@ app.use(passport.session());
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(function(req, res, next){
 	res.locals.user = req.user;
+	req.session.typedUser = req.typedUser;
 	next();
 });
 
 const User = mongoose.model("User");
+const Doctor = mongoose.model("Doctor");
 
 var LocalStrategy = require('passport-local').Strategy;
 passport.use(new LocalStrategy(function(username, password, done) {
@@ -59,6 +62,7 @@ passport.use(new LocalStrategy(function(username, password, done) {
 
 app.get("/",(req,res)=>{
 	console.log(req.user)
+	console.log(req.session)
   res.render("index");
 });
 app.get("/register",(req,res)=>{
@@ -71,10 +75,22 @@ app.get("/login",(req,res)=>{
 app.post('/login', function(req,res,next) {
   passport.authenticate('local', function(err,user) {
     if(user) {
-			console.log(user);
       req.logIn(user, function(err) {
-				console.log(user);
-        res.redirect('/');
+				// find typedUser associated with user acct
+				function findTypedUser(err, typedUser){
+					if(err){
+						console.log("error in finding typed user", err);
+					}
+					req.session.typedUser = typedUser;
+					res.redirect('/');
+				}
+				if(req.body.doctor === "on"){
+					Doctor.findOne({user:user._id}, findTypedUser);
+				}
+				else if(req.body.patient === "on"){
+					Patient.findOne({user:user._id}, findTypedUser);
+				}
+
       });
     } else {
 			console.log("incorrect credentials");
@@ -87,10 +103,31 @@ app.post('/register', function(req, res) {
   User.register(new User({username:req.body.username}),
       req.body.password, function(err, user){
     if (err) {
+			console.log("user exists");
       res.render('reg',{message:'Your registration information is not valid'});
     } else {
       passport.authenticate('local')(req, res, function() {
-        res.redirect('/');
+				// console.log(req.body);
+				if(req.body.doctor === "on"){
+					// keep in mind that mongoose has findByID
+					console.log(req.body.name);
+					const doctor = new Doctor({
+						name: req.body.name,
+						user: user,
+					});
+					doctor.save(()=>{
+						res.redirect('/');
+					});
+				}
+				else if(req.body.patient === "on"){
+					const patient = new Patient({
+						name: req.body.name,
+						user: user._id,
+					});
+					patient.save(()=>{
+						res.redirect('/');
+					});
+				}
       });
     }
   });

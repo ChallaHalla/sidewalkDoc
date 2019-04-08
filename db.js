@@ -18,15 +18,35 @@ UserSchema.plugin(passportLocalMongoose);
 
 
 
-// const Patient = new mongoose.Schema({
-// 	name: String,
-// 	updated_at: Date
-// });
-// const Doctor = new mongoose.Schema({
-// 	name: String,
-// 	updated_at: Date
-// });
+const PatientSchema = new mongoose.Schema({
+	name: String,
+  user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+  },
+});
+const DoctorSchema = new mongoose.Schema({
+	name: String,
+  // we can get a ptients location when they use the app but we always need to know a doctor's location
+  user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+  },
+  location: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Location'
+  },
+});
+const LocationSchema = new mongoose.Schema({
+  latitude: Number,
+  longitude: Number,
+  timeStamp: Date
+});
+
 
 // "register" it so that mongoose knows about it
 mongoose.model('User', UserSchema);
+mongoose.model('Patient', PatientSchema);
+mongoose.model('Doctor', DoctorSchema);
+mongoose.model('Location', LocationSchema);
 // mongoose.model('Cat', Cat);
