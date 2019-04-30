@@ -133,4 +133,33 @@ app.post('/register', function(req, res) {
   });
 });
 
+// NOTE: send lat and long as decimal degress, NOT degrees, minutes, seconds
+app.get('/doctors', function(req, res) {
+    // search range in meters (about a quarter mile). note it's not actually radius since im searching in a square
+    const searchRange = 400;
+    // url query string has latitude and longitude (in degrees)
+    const ptLatitude = req.query.latitude;
+    const ptLongitude = req.query.longitude;
+
+    // https://stackoverflow.com/questions/2839533/adding-distance-to-a-gps-coordinate#2839560
+    // (latitude runs north south. lines parallel to equator)
+    const upperLatLimit = ptLatitude + (180/Math.PI)*(searchRange/6378137);
+    const lowerLatLimit = ptLatitude - (180/Math.PI)*(searchRange/6378137);
+    const upperLongLimit = ptLongitude + (180/Math.PI)*(searchRange/6378137)/Math.cos(Math.PI/180*ptLatitude);
+    const lowerLongLimit = ptLongitude - (180/Math.PI)*(searchRange/6378137)/Math.cos(Math.PI/180*ptLatitude);
+
+    // find doctors within specified range
+    console.log("searching between latitudes (" + lowerLatLimit + ", " + upperLatLimit + ") and longitudes (" + lowerLongLimit + ", " + upperLongLimit + ")");
+    // make this query actually works lol
+    Doctor.find({ $and: [
+            {$and: [{latitude: {$gt: lowerLatLimit}}, {latitude: {$lt: upperLatLimit}}]},
+            {$and: [{longitude: {$gt: lowerLongLimit}}, {longitude: {$lt: upperLongLimit}}]},
+        ] },
+        (err, docs) => {
+            // if all goes well, should have an array of all doctors within range here
+        }
+    );
+});
+
+
 app.listen(3000);
