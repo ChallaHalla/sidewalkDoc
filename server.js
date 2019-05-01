@@ -34,11 +34,8 @@ app.use(function(req, res, next){
 });
 
 const User = mongoose.model("User");
-<<<<<<< Updated upstream
-=======
 const Alert = mongoose.model("Alert");
 const Patient = mongoose.model("Patient");
->>>>>>> Stashed changes
 const Doctor = mongoose.model("Doctor");
 
 var LocalStrategy = require('passport-local').Strategy;
