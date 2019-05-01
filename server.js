@@ -224,11 +224,13 @@ app.get('/nearbyAlerts', function(req, res) {
     // find alerts within range of this doctor (and that do not have a doctor already assigned)
     // make sure this query actually works lol
     Alert.find({ $and: [
-            {$and: [{latitude: {$gt: lowerLatLimit}}, {latitude: {$lt: upperLatLimit}}]},
-            {$and: [{longitude: {$gt: lowerLongLimit}}, {longitude: {$lt: upperLongLimit}}]},
+            {latitude: {$gt: lowerLatLimit, $lt: upperLatLimit}},
+            {longitude: {$gt: lowerLongLimit, $lt: upperLongLimit}},
             {doctor: null}
         ] },
         (err, alerts) => {
+            console.log("matching alerts:");
+            console.log(alerts);
             res.json(alerts);
         }
     );
