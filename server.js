@@ -154,7 +154,7 @@ app.post('/login', function(req,res,next) {
 });
 
 app.post('/register', function(req, res) {
-	// req.body = JSON.parse(Object.keys(req.body)[0]);
+	req.body = JSON.parse(Object.keys(req.body)[0]);
 	console.log(req.body);
 	const userType = req.body.userType;
 	const name = req.body.name;
@@ -165,6 +165,7 @@ app.post('/register', function(req, res) {
   User.register(new User({username:req.body.username}),
       req.body.password, function(err, user){
     if (err) {
+			console.log(err);
 			res.json({
 				status:"error"
 			});
@@ -190,7 +191,8 @@ app.post('/register', function(req, res) {
 				console.log(typedUser);
 				typedUser.save((e)=>{
 					res.json({
-						status:"account created"
+						status:"account created",
+						userId: user._id,
 					});
 				});
       });
