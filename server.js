@@ -69,22 +69,38 @@ app.get("/",(req,res)=>{
 });
 
 app.post('/createAlert', function(req, res) {
+	req.body = JSON.parse(Object.keys(req.body)[0]);
+
 	const description = req.body.description;
 	const severity = req.body.severity;
+	const location = {
+		latitude: req.body.latitude,
+		longitude: req.body.longitude
+	};
+	const userId = req.body.userId;
 
-	let tags = req.body.tags;
-	tags = tags.substring(1,tags.length-1).split(",");
+	// let tags = req.body.tags;
+	// tags = tags.substring(1,tags.length-1).split(",");
 
-	const alert = new Alert({
-		description: description,
-		severity:severity,
-		tags: tags,
+	// const patient = findTypedUser(userId,"patient");
+	// REPLACE THIS WITH findTypedUser
+	Patient.findOne({user:userId},(err,patient)=>{
+		const alert = new Alert({
+			description: description,
+			latitude: location.latitude,
+			longitude: location.longitude,
+			patient: patient._id
+			// severity:severity,
+			// tags: tags,
+		});
+		console.log(alert);
+		alert.save((e)=>{
+			res.json({
+				"status": "success"
+		});
 	});
-	alert.save((e)=>{
-		res.json({
-			"status": "success",
+
 	});
-});
 });
 
 app.post('/updateAlert', function(req, res) {
@@ -103,19 +119,29 @@ app.post('/login', function(req,res,next) {
   passport.authenticate('local', function(err,user) {
     if(user) {
       req.logIn(user, function(err) {
+				console.log('here');
+				console.log(user);
 				// find typedUser associated with user acct
-				function findTypedUser(err, typedUser){
-					if(err){
-						console.log("error in finding typed user", err);
+				function typedUserResponse(err, typedUser){
+					if(err || typedUser === null){
+						res.json({
+							status:"incorrect credentials"
+						});
+					} else{
+						req.session.typedUser = typedUser;
+						console.log("made it");
+						console.log(typedUser);
+						res.json({
+							"status": "success",
+							"userId": user._id,
+						});
 					}
-					req.session.typedUser = typedUser;
-					res.redirect('/');
 				}
 				if(req.body.doctor === "on"){
-					Doctor.findOne({user:user._id}, findTypedUser);
+					Doctor.findOne({user:user._id}, typedUserResponse);
 				}
 				else if(req.body.patient === "on"){
-					Patient.findOne({user:user._id}, findTypedUser);
+					Patient.findOne({user:user._id}, typedUserResponse);
 				}
 
       });
@@ -128,7 +154,7 @@ app.post('/login', function(req,res,next) {
 });
 
 app.post('/register', function(req, res) {
-	req.body = JSON.parse(Object.keys(req.body)[0]);
+	// req.body = JSON.parse(Object.keys(req.body)[0]);
 	console.log(req.body);
 	const userType = req.body.userType;
 	const name = req.body.name;
@@ -146,12 +172,14 @@ app.post('/register', function(req, res) {
       passport.authenticate('local')(req, res, function() {
 				// create doctor or patient object and place user within here
 				let typedUser;
-				if(userType === "patient"){
+				console.log
+				if(req.body.patient === "on"){
+					console.log("HERE");
 					typedUser = new Patient({
 						name:name,
 						user: user._id,
 					});
-				}else{
+				}else if(req.body.doctor == 'on'){
 					typedUser = new Doctor({
 						name:name,
 						user: user._id,
@@ -197,6 +225,22 @@ app.get('/nearbyAlerts', function(req, res) {
         }
     );
 });
+function findTypedUser(userId, userType){
+	console.log("HERE");
+	User.findOne({_id:userId},(err,user)=>{
+		console.log("FOUND USER",err,user);
+		if(userType === "patient"){
+			Patient.findOne({user:user._id},(err,patient)=>{
+				console.log("FOUND PATIENT",err,patient);
+				return patient;
+			});
+		} else if(userType === "doctor"){
+			Doctor.findOne({user:user._id},(err,doctor)=>{
+				return doctor;
+			});
+		}
+	});
+}
 
 
 app.listen(3000);

@@ -25,7 +25,8 @@ const AlertSchema = new mongoose.Schema({
     },
   doctor: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Doctor'
+    ref: 'Doctor',
+    default: null
     },
   tags: [{
     type: String
