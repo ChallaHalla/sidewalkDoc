@@ -201,16 +201,22 @@ app.post('/register', function(req, res) {
 // NOTE: send lat and long as decimal degress, NOT degrees, minutes, seconds
 app.get('/nearbyAlerts', function(req, res) {
     // search range in meters (about a quarter mile). note it's not actually radius since im searching in a square
-    const searchRange = 400;
+    const searchRange = 200;
     // url query string has latitude and longitude (in degrees)
-    const docLatitude = req.query.latitude;
-    const docLongitude = req.query.longitude;
+    const docLatitude = Number(req.query.latitude);
+    const docLongitude = Number(req.query.longitude);
 
     // https://stackoverflow.com/questions/2839533/adding-distance-to-a-gps-coordinate#2839560
-    const upperLatLimit = docLatitude + (180/Math.PI)*(searchRange/6378137);
-    const lowerLatLimit = docLatitude - (180/Math.PI)*(searchRange/6378137);
-    const upperLongLimit = docLongitude + (180/Math.PI)*(searchRange/6378137)/Math.cos(Math.PI/180*docLatitude);
-    const lowerLongLimit = docLongitude - (180/Math.PI)*(searchRange/6378137)/Math.cos(Math.PI/180*docLatitude);
+    const latRange = Math.abs((180/Math.PI)*(searchRange/6378137));
+    var upperLatLimit = docLatitude + latRange;
+    var lowerLatLimit = docLatitude - latRange;
+    const longRange = Math.abs((180/Math.PI)*(searchRange/6378137) / Math.cos(Math.PI/180*docLatitude));
+    var upperLongLimit = docLongitude + longRange;
+    var lowerLongLimit = docLongitude - longRange;
+    upperLatLimit = Math.round(upperLatLimit*1000000) / 1000000;
+    lowerLatLimit = Math.round(lowerLatLimit*1000000) / 1000000;
+    upperLongLimit = Math.round(upperLongLimit*1000000) / 1000000;
+    lowerLongLimit = Math.round(lowerLongLimit*1000000) / 1000000;
 
     console.log("searching between latitudes (" + lowerLatLimit + ", " + upperLatLimit + ") and longitudes (" + lowerLongLimit + ", " + upperLongLimit + ")");
     // find alerts within range of this doctor (and that do not have a doctor already assigned)
