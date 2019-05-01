@@ -30,30 +30,29 @@ const AlertSchema = new mongoose.Schema({
   tags: [{
     type: String
   }],
-  severity:String,
-  description:String
+  description: String,
+  latitude: Number,
+  longitude: Number
 });
 
 const PatientSchema = new mongoose.Schema({
 	name: String,
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-    },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }
 });
 const DoctorSchema = new mongoose.Schema({
 	name: String,
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     },
-    latitude: String,
-    longitude:String,
+    latitude: Number,
+    longitude: Number
 });
 
-// "register" it so that mongoose knows about it
 mongoose.model('User', UserSchema);
 mongoose.model('Alert', AlertSchema);
 mongoose.model('Doctor', DoctorSchema);
 mongoose.model('Patient', PatientSchema);
-// mongoose.model('Cat', Cat);
