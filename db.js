@@ -17,44 +17,43 @@ UserSchema.pre('save', function(next) {
 UserSchema.plugin(passportLocalMongoose);
 
 
+const AlertSchema = new mongoose.Schema({
+  date: { type: Date, default: Date.now },
+  patient:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Patient'
+    },
+  doctor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Doctor'
+    },
+  tags: [{
+    type: String
+  }],
+  severity:String,
+  description:String
+});
 
 const PatientSchema = new mongoose.Schema({
 	name: String,
   user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-  }
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+    },
 });
 const DoctorSchema = new mongoose.Schema({
 	name: String,
-  // we can get a ptients location when they use the app but we always need to know a doctor's location
   user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-  },
-  latitude: Number,
-  longitude: Number,
-  timeStamp: Date
-  /*
-  location: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Location'
-  },
-  */
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+    },
+    latitude: String,
+    longitude:String,
 });
-
-/* since only doctors need location stored server side, im putting location/timestamp in the doctor model instead of separate location model (requires fewer db queries)
-const LocationSchema = new mongoose.Schema({
-  latitude: Number,
-  longitude: Number,
-  timeStamp: Date
-});
-*/
-
 
 // "register" it so that mongoose knows about it
 mongoose.model('User', UserSchema);
-mongoose.model('Patient', PatientSchema);
+mongoose.model('Alert', AlertSchema);
 mongoose.model('Doctor', DoctorSchema);
-//mongoose.model('Location', LocationSchema);
+mongoose.model('Patient', PatientSchema);
 // mongoose.model('Cat', Cat);

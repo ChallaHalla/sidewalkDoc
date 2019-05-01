@@ -34,6 +34,11 @@ app.use(function(req, res, next){
 });
 
 const User = mongoose.model("User");
+<<<<<<< Updated upstream
+=======
+const Alert = mongoose.model("Alert");
+const Patient = mongoose.model("Patient");
+>>>>>>> Stashed changes
 const Doctor = mongoose.model("Doctor");
 
 var LocalStrategy = require('passport-local').Strategy;
@@ -65,6 +70,29 @@ app.get("/",(req,res)=>{
 	console.log(req.session)
   res.render("index");
 });
+
+app.post('/createAlert', function(req, res) {
+	const description = req.body.description;
+	const severity = req.body.severity;
+
+	let tags = req.body.tags;
+	tags = tags.substring(1,tags.length-1).split(",");
+
+	const alert = new Alert({
+		description: description,
+		severity:severity,
+		tags: tags,
+	});
+	alert.save((e)=>{
+		res.json({
+			"status": "success",
+	});
+});
+});
+
+app.post('/updateAlert', function(req, res) {
+});
+
 app.get("/register",(req,res)=>{
   res.render("reg");
 });
@@ -73,6 +101,8 @@ app.get("/login",(req,res)=>{
 });
 
 app.post('/login', function(req,res,next) {
+	// need to address weird req structure
+	req.body = JSON.parse(Object.keys(req.body)[0]);
   passport.authenticate('local', function(err,user) {
     if(user) {
       req.logIn(user, function(err) {
@@ -93,41 +123,51 @@ app.post('/login', function(req,res,next) {
 
       });
     } else {
-			console.log("incorrect credentials");
-      res.render('/', {message:'Your login or password is incorrect.'});
+			res.json({
+				status:"incorrect credentials"
+			});
     }
   })(req, res, next);
 });
 
 app.post('/register', function(req, res) {
+	req.body = JSON.parse(Object.keys(req.body)[0]);
+	console.log(req.body);
+	const userType = req.body.userType;
+	const name = req.body.name;
+	const location = {
+		latitude: req.body.latitude,
+		longitude: req.body.longitude,
+	};
   User.register(new User({username:req.body.username}),
       req.body.password, function(err, user){
     if (err) {
-			console.log("user exists");
-      res.render('reg',{message:'Your registration information is not valid'});
+			res.json({
+				status:"error"
+			});
     } else {
       passport.authenticate('local')(req, res, function() {
-				// console.log(req.body);
-				if(req.body.doctor === "on"){
-					// keep in mind that mongoose has findByID
-					console.log(req.body.name);
-					const doctor = new Doctor({
-						name: req.body.name,
-						user: user,
-					});
-					doctor.save(()=>{
-						res.redirect('/');
-					});
-				}
-				else if(req.body.patient === "on"){
-					const patient = new Patient({
-						name: req.body.name,
+				// create doctor or patient object and place user within here
+				let typedUser;
+				if(userType === "patient"){
+					typedUser = new Patient({
+						name:name,
 						user: user._id,
 					});
-					patient.save(()=>{
-						res.redirect('/');
+				}else{
+					typedUser = new Doctor({
+						name:name,
+						user: user._id,
+						latitude: location.latitude,
+						longitude: location.longitude,
 					});
 				}
+				console.log(typedUser);
+				typedUser.save((e)=>{
+					res.json({
+						status:"account created"
+					});
+				});
       });
     }
   });
