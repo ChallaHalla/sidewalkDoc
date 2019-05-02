@@ -201,6 +201,26 @@ app.post('/register', function(req, res) {
   });
 });
 
+// doctor sends their ID and location in url. name them: doctorID, latitude, and longitude
+app.get('/updateDocLocation', function(req, res) {
+    Doctor.findById(req.query.doctorID, function(err, doc) {
+        if (err) {
+            res.json({status: "error"});
+        } else {
+            doc.latitude = req.query.latitude;
+            doc.longitude = req.query.longitude;
+            doc.save(function(err, doc) {
+                if (err) {
+                    res.json({status: "error"});
+                } else {
+                    console.log(doc.name + " location updated to " + doc.latitude + ", " + doc.longitude);
+                    res.json({status: "success"});
+                }
+            });
+        }
+    });
+});
+
 // NOTE: send lat and long as decimal degress, NOT degrees, minutes, seconds
 app.get('/nearbyAlerts', function(req, res) {
 		console.log("finding nearby alerts");
@@ -247,9 +267,11 @@ app.post('/respondToAlert', function(req, res) {
     req.body = JSON.parse(Object.keys(req.body)[0]);
     Alert.findById(req.body.alertID, function(err, alert) {
         alert.doctor = req.body.doctorID;
-        console.log("updated alert with doc");
-        console.log(alert);
-        res.json({"status": "success"});
+        alert.save(function(err, al) {
+            console.log("updated alert with doc");
+            console.log(al);
+            res.json({"status": "success"});
+        });
     });
 });
 
