@@ -231,10 +231,25 @@ app.get('/nearbyAlerts', function(req, res) {
         (err, alerts) => {
             console.log("matching alerts:");
             console.log(alerts);
+            // return array of Alert objects to app
             res.json(alerts);
         }
     );
 });
+
+// endpoint for assigning a doctor to an alert.
+    // sent by doctor, request contains both doctor's User objectID and chosen Alert's objectID
+    // this is a POST because it is making changes server side, but a GET would probably work just as well
+app.post('/respondToAlert', function(req, res) {
+    req.body = JSON.parse(Object.keys(req.body)[0]);
+    Alert.findById(req.body.alertID, function(err, alert) {
+        alert.doctor = req.body.doctorID;
+        console.log("updated alert with doc");
+        console.log(alert);
+        res.json({"status": "success"});
+    });
+});
+
 function findTypedUser(userId, userType){
 	console.log("HERE");
 	User.findOne({_id:userId},(err,user)=>{
