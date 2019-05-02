@@ -69,6 +69,7 @@ app.get("/",(req,res)=>{
 });
 
 app.post('/createAlert', function(req, res) {
+
 	req.body = JSON.parse(Object.keys(req.body)[0]);
 
 	const description = req.body.description;
@@ -202,6 +203,7 @@ app.post('/register', function(req, res) {
 
 // NOTE: send lat and long as decimal degress, NOT degrees, minutes, seconds
 app.get('/nearbyAlerts', function(req, res) {
+		console.log("finding nearby alerts");
     // search range in meters (about a quarter mile). note it's not actually radius since im searching in a square
     const searchRange = 200;
     // url query string has latitude and longitude (in degrees)
@@ -229,10 +231,11 @@ app.get('/nearbyAlerts', function(req, res) {
             {doctor: null}
         ] },
         (err, alerts) => {
-            console.log("matching alerts:");
-            console.log(alerts);
-            // return array of Alert objects to app
-            res.json(alerts);
+					console.log(alerts);
+            res.json({
+						status:"success",
+						// alerts:alerts
+						});
         }
     );
 });
