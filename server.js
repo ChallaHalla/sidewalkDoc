@@ -205,7 +205,7 @@ app.post('/register', function(req, res) {
 app.get('/nearbyAlerts', function(req, res) {
 		console.log("finding nearby alerts");
     // search range in meters (about a quarter mile). note it's not actually radius since im searching in a square
-    const searchRange = 200;
+    const searchRange = 3000;
     // url query string has latitude and longitude (in degrees)
     const docLatitude = Number(req.query.latitude);
     const docLongitude = Number(req.query.longitude);
@@ -234,7 +234,7 @@ app.get('/nearbyAlerts', function(req, res) {
 					console.log(alerts);
             res.json({
 						status:"success",
-						// alerts:alerts
+						alerts:alerts
 						});
         }
     );
