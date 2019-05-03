@@ -144,7 +144,6 @@ app.post('/login', function(req,res,next) {
 				else if(req.body.patient === "on"){
 					Patient.findOne({user:user._id}, typedUserResponse);
 				}
-
       });
     } else {
 			res.json({
