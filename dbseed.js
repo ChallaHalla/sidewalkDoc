@@ -69,21 +69,27 @@ function addDoctor(doc) {
 const alert1 = new Alert({
   description: description,
   latitude: 40.731452,
-  longitude: -73.997839
+  longitude: -73.997839,
+  patient: null,
+  doctor: null
   // severity:severity,
   // tags: tags,
 });
 const alert2 = new Alert({
   description: description,
   latitude: 40.728883,
-  longitude: -73.990844
+  longitude: -73.990844,
+  patient: null,
+  doctor: null
   // severity:severity,
   // tags: tags,
 });
 const alert3 = new Alert({
   description: description,
   latitude: 40.735339,
-  longitude: -73.990694
+  longitude: -73.990694,
+  patient: null,
+  doctor: null
   // severity:severity,
   // tags: tags,
 });
