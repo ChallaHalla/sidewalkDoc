@@ -264,8 +264,9 @@ app.get('/nearbyAlerts', function(req, res) {
     // this is a POST because it is making changes server side, but a GET would probably work just as well
 app.post('/respondToAlert', function(req, res) {
     req.body = JSON.parse(Object.keys(req.body)[0]);
-    Alert.findById(req.body.alertID, function(err, alert) {
-        alert.doctor = req.body.doctorID;
+    Alert.findById(req.body.alertId, function(err, alert) {
+			// stores userId associated with doctor
+        alert.doctor = req.body.doctorId;
         alert.save(function(err, al) {
             console.log("updated alert with doc");
             console.log(al);
