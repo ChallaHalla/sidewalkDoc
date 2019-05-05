@@ -68,6 +68,20 @@ app.get("/",(req,res)=>{
   res.render("index");
 });
 
+app.get('/getAlert', function(req, res) {
+	console.log("HIT")
+    Alert.findById(req.query.alertId, function(err, alert) {
+			if(err){
+
+			}else{
+				res.json({
+					"status": "success",
+					"alert": alert,
+			});
+			}
+    });
+});
+
 app.post('/createAlert', function(req, res) {
 
 	req.body = JSON.parse(Object.keys(req.body)[0]);
@@ -97,7 +111,8 @@ app.post('/createAlert', function(req, res) {
 		console.log(alert);
 		alert.save((e)=>{
 			res.json({
-				"status": "success"
+				"status": "success",
+				"alert": alert
 		});
 	});
 
