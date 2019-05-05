@@ -80,8 +80,8 @@ app.post('/createAlert', function(req, res) {
 	};
 	const userId = req.body.userId;
 
-	// let tags = req.body.tags;
-	// tags = tags.substring(1,tags.length-1).split(",");
+	let tags = req.body.tags;
+	console.log(tags)
 
 	// const patient = findTypedUser(userId,"patient");
 	// REPLACE THIS WITH findTypedUser
@@ -90,9 +90,9 @@ app.post('/createAlert', function(req, res) {
 			description: description,
 			latitude: location.latitude,
 			longitude: location.longitude,
-			patient: patient._id
+			patient: patient._id,
 			// severity:severity,
-			// tags: tags,
+			tags: tags,
 		});
 		console.log(alert);
 		alert.save((e)=>{
