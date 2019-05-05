@@ -71,15 +71,25 @@ app.get("/",(req,res)=>{
 app.get('/getAlert', function(req, res) {
 	console.log("HIT")
     Alert.findById(req.query.alertId, function(err, alert) {
-			if(err){
-
-			}else{
+			if(!alert){
 				res.json({
-					"status": "success",
-					"alert": alert,
-			});
+					"status": "alert not found"
+				});
+			} else{
+				User.findById(alert.doctor, function(err,user){
+					if(user === null){
+						user = {};
+					}
+					Doctor.findOne({user:user._id}, function(err,doctor){
+						res.json({
+									"status": "success",
+									"alert": alert,
+									"doctor": doctor
+							});
+					})
+				})
 			}
-    });
+		});
 });
 
 app.post('/createAlert', function(req, res) {
