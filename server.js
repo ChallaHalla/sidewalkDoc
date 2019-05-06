@@ -81,6 +81,7 @@ app.get('/getAlert', function(req, res) {
 						user = {};
 					}
 					Doctor.findOne({user:user._id}, function(err,doctor){
+						console.log(doctor);
 						res.json({
 									"status": "success",
 									"alert": alert,
@@ -226,23 +227,36 @@ app.post('/register', function(req, res) {
 });
 
 // doctor sends their ID and location in url. name them: doctorID, latitude, and longitude
-app.get('/updateDocLocation', function(req, res) {
-    Doctor.findById(req.query.doctorID, function(err, doc) {
-        if (err) {
-            res.json({status: "error"});
-        } else {
-            doc.latitude = req.query.latitude;
-            doc.longitude = req.query.longitude;
-            doc.save(function(err, doc) {
-                if (err) {
-                    res.json({status: "error"});
-                } else {
-                    console.log(doc.name + " location updated to " + doc.latitude + ", " + doc.longitude);
-                    res.json({status: "success"});
-                }
-            });
-        }
-    });
+app.post('/updateDocLocation', function(req, res) {
+	req.body = JSON.parse(Object.keys(req.body)[0]);
+	console.log(req.body.doctorId)
+	User.findById(req.body.doctorId,(err,user)=>{
+		console.log(user);
+		if(user === null){
+			res.json({status: "error"});
+		} else{
+			Doctor.findOne({user:user._id}, function(err, doc) {
+				console.log(doc);
+	        if (err) {
+						// console.log(err)
+	            res.json({status: "error"});
+	        } else {
+						console.log(req.body)
+	            doc.latitude = req.body.latitude;
+	            doc.longitude = req.body.longitude;
+	            doc.save(function(err, doc) {
+	                if (err) {
+	                    res.json({status: "error"});
+	                } else {
+	                    console.log(doc.name + " location updated to " + doc.latitude + ", " + doc.longitude);
+	                    res.json({status: "success"});
+	                }
+	            });
+	        }
+	    });
+		}
+	});
+
 });
 
 // NOTE: send lat and long as decimal degress, NOT degrees, minutes, seconds
