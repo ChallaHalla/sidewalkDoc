@@ -131,6 +131,7 @@ app.post('/createAlert', function(req, res) {
 });
 
 app.post('/resolveAlert', function(req, res) {
+	console.log("RESOLVING")
     req.body = JSON.parse(Object.keys(req.body)[0]);
     Alert.findById(req.body.alertId, function(err, alert) {
         if (err) {
