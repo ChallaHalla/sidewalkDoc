@@ -133,8 +133,14 @@ app.post('/createAlert', function(req, res) {
 app.post('/resolveAlert', function(req, res) {
     req.body = JSON.parse(Object.keys(req.body)[0]);
     Alert.findById(req.body.alertId, function(err, alert) {
+        if (err) {
+            res.json({"status": "error"});
+        }
         alert.resolved = true;
         alert.save(function(err, al) {
+            if (err) {
+                res.json({"status": "error"});
+            }
             console.log("alert resolved");
             console.log(al);
             res.json({"status": "success"});
