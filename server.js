@@ -138,9 +138,10 @@ app.post('/resolveAlert', function(req, res) {
         }
         alert.resolved = true;
         alert.save(function(err, al) {
-            if (err) {
-                res.json({"status": "error"});
-            }
+					if(err){
+						console.log(err);
+						res.json({"status":"error"});
+					}
             console.log("alert resolved");
             console.log(al);
             res.json({"status": "success"});
@@ -149,6 +150,22 @@ app.post('/resolveAlert', function(req, res) {
 });
 
 app.post('/updateAlert', function(req, res) {
+	req.body = JSON.parse(Object.keys(req.body)[0]);
+	Alert.findById(req.body.alertId, function(err, alert) {
+		alert.description = req.body.description;
+		alert.tags = req.body.tags;
+			alert.save((err, al) =>{
+				if(err){
+					console.log(err);
+					res.json({"status":"error"});
+				}
+				console.log("updated alert");
+					res.json({
+						"status": "success",
+						"alert": alert
+					});
+			});
+	});
 });
 
 app.get("/register",(req,res)=>{
@@ -246,6 +263,10 @@ app.post('/register', function(req, res) {
 
 // doctor sends their ID and location in url. name them: doctorID, latitude, and longitude
 app.post('/updateDocLocation', function(req, res) {
+
+	// also send updated alert in response for doctor
+
+	console.log("updating doc loc");
 	req.body = JSON.parse(Object.keys(req.body)[0]);
 	console.log(req.body.doctorId)
 	User.findById(req.body.doctorId,(err,user)=>{
@@ -259,7 +280,8 @@ app.post('/updateDocLocation', function(req, res) {
 						// console.log(err)
 	            res.json({status: "error"});
 	        } else {
-						console.log(req.body)
+						Alert.findById(req.body.alertId,(err,alert)=>{
+							// console.log(req.body)
 	            doc.latitude = req.body.latitude;
 	            doc.longitude = req.body.longitude;
 	            doc.save(function(err, doc) {
@@ -267,9 +289,13 @@ app.post('/updateDocLocation', function(req, res) {
 	                    res.json({status: "error"});
 	                } else {
 	                    console.log(doc.name + " location updated to " + doc.latitude + ", " + doc.longitude);
-	                    res.json({status: "success"});
+	                    res.json({
+												status: "success",
+												alert: alert,
+											});
 	                }
 	            });
+						});
 	        }
 	    });
 		}
