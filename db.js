@@ -33,7 +33,11 @@ const AlertSchema = new mongoose.Schema({
   }],
   description: String,
   latitude: Number,
-  longitude: Number
+  longitude: Number,
+  resolved: {
+      type: Boolean,
+      default: false
+  }
 });
 
 const PatientSchema = new mongoose.Schema({

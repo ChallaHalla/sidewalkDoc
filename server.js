@@ -130,6 +130,18 @@ app.post('/createAlert', function(req, res) {
 	});
 });
 
+app.post('/resolveAlert', function(req, res) {
+    req.body = JSON.parse(Object.keys(req.body)[0]);
+    Alert.findById(req.body.alertId, function(err, alert) {
+        alert.resolved = true;
+        alert.save(function(err, al) {
+            console.log("alert resolved");
+            console.log(al);
+            res.json({"status": "success"});
+        });
+    });
+});
+
 app.post('/updateAlert', function(req, res) {
 });
 
